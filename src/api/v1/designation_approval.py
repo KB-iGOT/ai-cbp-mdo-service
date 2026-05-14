@@ -7,7 +7,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ...core.auth import require_cbp_creator
+from ...core.auth import require_role
 from ...core.database import get_db_session
 from ...core.logger import logger
 from ...controller.designation_approval import designation_approval_controller
@@ -32,7 +32,7 @@ async def list_designation_approvals(
     from_date: Optional[str] = Query(None, description="Filter from date (YYYY-MM-DD)"),
     to_date: Optional[str] = Query(None, description="Filter to date (YYYY-MM-DD)"),
     db: AsyncSession = Depends(get_db_session),
-    auth: tuple = Depends(require_cbp_creator),
+    auth: tuple = Depends(require_role(['SPV_ADMIN'])),
 ):
     """
     Get paginated list of designation approval requests for SPV admin.
@@ -69,7 +69,7 @@ async def list_designation_approvals(
 async def approve_designation(
     body: ApproveDesignationBody,
     db: AsyncSession = Depends(get_db_session),
-    auth: tuple = Depends(require_cbp_creator),
+    auth: tuple = Depends(require_role(['SPV_ADMIN'])),
 ):
     """
     Approve a single designation approval request.
@@ -107,7 +107,7 @@ async def approve_designation(
 async def reject_designation(
     body: RejectDesignationBody,
     db: AsyncSession = Depends(get_db_session),
-    auth: tuple = Depends(require_cbp_creator),
+    auth: tuple = Depends(require_role(['SPV_ADMIN'])),
 ):
     """
     Reject a single designation approval request.

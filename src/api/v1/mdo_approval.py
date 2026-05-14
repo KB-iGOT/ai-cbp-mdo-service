@@ -7,7 +7,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ...core.auth import require_cbp_creator
+from ...core.auth import require_role
 from ...core.database import get_db_session
 from ...core.logger import logger
 from ...controller.mdo_approval import mdo_approval_controller
@@ -39,7 +39,7 @@ async def get_approval_requests(
     from_date: Optional[str] = Query(None, description="Filter from date (YYYY-MM-DD)"),
     to_date: Optional[str] = Query(None, description="Filter to date (YYYY-MM-DD)"),
     db: AsyncSession = Depends(get_db_session),
-    auth: tuple = Depends(require_cbp_creator),
+    auth: tuple = Depends(require_role(['MDO_ADMIN','MDO_LEADER'])),
 ):
     """
     Get paginated list of approval requests for the MDO.
@@ -78,7 +78,7 @@ async def get_approval_requests(
 async def get_approval_request_detail(
     request_id: UUID,
     db: AsyncSession = Depends(get_db_session),
-    auth: tuple = Depends(require_cbp_creator),
+    auth: tuple = Depends(require_role(['MDO_ADMIN','MDO_LEADER'])),
 ):
     """
     Get detailed view of a specific approval request with all items.
@@ -111,7 +111,7 @@ async def get_approval_request_detail(
 async def publish_request(
     body: ApproveRequestBody,
     db: AsyncSession = Depends(get_db_session),
-    auth: tuple = Depends(require_cbp_creator),
+    auth: tuple = Depends(require_role(['MDO_ADMIN','MDO_LEADER'])),
 ):
     """
     Approve all items in an approval request, create a CBP plan via the
@@ -164,7 +164,7 @@ async def publish_request(
 async def reject_request(
     body: RejectRequestBody,
     db: AsyncSession = Depends(get_db_session),
-    auth: tuple = Depends(require_cbp_creator),
+    auth: tuple = Depends(require_role(['MDO_ADMIN','MDO_LEADER'])),
 ):
     """
     Reject all items in an approval request.
@@ -209,7 +209,7 @@ async def reject_request(
 async def reject_approval_request_item(
     body: RejectItemBody,
     db: AsyncSession = Depends(get_db_session),
-    auth: tuple = Depends(require_cbp_creator),
+    auth: tuple = Depends(require_role(['MDO_ADMIN','MDO_LEADER'])),
 ):
     """
     Reject a specific item in an approval request with comments.
