@@ -34,6 +34,7 @@ class DesignationApprovalItem(BaseModel):
     email: Optional[str] = None          # from user.email
     status: str
     reviewer_comments: Optional[str] = None
+    actioned_by: Optional[str] = None
     created_at: datetime
 
     @classmethod
@@ -46,6 +47,7 @@ class DesignationApprovalItem(BaseModel):
             "email": obj.user.email if obj.user else None,
             "status": obj.status,
             "reviewer_comments": obj.reviewer_comments,
+            "actioned_by": obj.actioned_by,
             "created_at": obj.created_at,
         }
         return cls(**data)
