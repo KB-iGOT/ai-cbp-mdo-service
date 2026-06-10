@@ -1,7 +1,5 @@
 FROM python:3.12-slim
-
 RUN apt-get update && apt-get install -y --no-install-recommends
-
 # Install uv.
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
  
@@ -14,6 +12,11 @@ COPY pyproject.toml* uv.lock* ./
 RUN uv sync --frozen --no-cache
 COPY ./src /app/src
 COPY ./templates /app/templates
+ 
+# Create non-root user and give ownership of /app
+RUN groupadd -r appuser && useradd -r -g appuser appuser \
+    && chown -R appuser:appuser /app
+USER appuser
  
 # Expose the Fastapi port (default: 8000)
 EXPOSE 8000
