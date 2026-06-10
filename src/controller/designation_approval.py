@@ -108,7 +108,7 @@ class DesignationApprovalController:
             message = "Successfully approved"
 
         # Step 3: iGOT succeeded — now save approval to DB
-        success = await crud_designation_approval.approve(db=db, record_id=record_id)
+        success = await crud_designation_approval.approve(db=db, record_id=record_id, actioned_by=approver_id)
         if not success:
             logger.warning(f"Failed to save approval for {record_id} (concurrent update)")
             return False, None, None
@@ -180,6 +180,7 @@ class DesignationApprovalController:
             db=db,
             record_id=record_id,
             reviewer_comments=reviewer_comments,
+            actioned_by=rejector_id,
         )
         
         if success:

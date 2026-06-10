@@ -175,6 +175,7 @@ class CRUDDesignationApproval:
         self,
         db: AsyncSession,
         record_id: uuid.UUID,
+        actioned_by: Optional[str] = None,
     ) -> bool:
         """
         Approve a single designation approval by ID.
@@ -191,6 +192,7 @@ class CRUDDesignationApproval:
             .where(DesignationApproval.id == record_id)
             .values(
                 status=DesignationApprovalStatus.APPROVED.value,
+                actioned_by=actioned_by,
                 updated_at=now,
             )
         )
@@ -202,6 +204,7 @@ class CRUDDesignationApproval:
         db: AsyncSession,
         record_id: uuid.UUID,
         reviewer_comments: Optional[str] = None,
+        actioned_by: Optional[str] = None,
     ) -> bool:
         """
         Reject a single designation approval by ID.
@@ -219,6 +222,7 @@ class CRUDDesignationApproval:
             .values(
                 status=DesignationApprovalStatus.REJECTED.value,
                 reviewer_comments=reviewer_comments,
+                actioned_by=actioned_by,
                 updated_at=now,
             )
         )
