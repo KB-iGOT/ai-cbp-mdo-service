@@ -6,20 +6,29 @@ from .core.database import Base, sessionmanager
 from .api import router
 from .core.configs import EnvironmentOption, settings
 from .core.logger import logger
+from .core.middleware import APILoggingMiddleware
 
 # Import all models to ensure they're registered with SQLAlchemy
 from .models import mdo_approval
+from .models import designation_approval
+from .models import user
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("✅ Starting up...")
     
-    sessionmanager.init(settings.DATABASE_URL)
+    try:
+        # Create database tables
+        logger.info("🔧 Initializing database...")
+        sessionmanager.init(settings.DATABASE_URL)
+        async with sessionmanager.connect() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        logger.info("✅ Database initialized successfully")
+    except Exception as e:
+        logger.error(f"❌ Database initialization failed: {e}")
+        raise e  # Re-raise the exception to prevent the app from starting
     
-    logger.info("--- Creating Tables ---")
-    async with sessionmanager.connect() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    logger.info("✅ Database tables ready")
+    logger.info("✅ Application startup complete")
     
     yield
     # On shutdown, dispose of the connection pool
@@ -46,5 +55,7 @@ app.add_middleware(
     allow_methods=["*"],      # Allow all HTTP methods
     allow_headers=["*"],      # Allow all headers
 )
+
+app.add_middleware(APILoggingMiddleware)
 
 app.include_router(router)

@@ -17,17 +17,25 @@ class Settings(BaseSettings):
     ENVIRONMENT: EnvironmentOption = EnvironmentOption.LOCAL
     LOG_LEVEL: str = "INFO"
 
-    APP_NAME: str = "MDO Approval System"
-    APP_DESC: str = "API for managing MDO approval requests"
+    APP_NAME: str = "AI CBP MDO Service"
+    APP_DESC: str = "API for managing CBP MDO approval requests"
     APP_VERSION: str = "1.0.0"
-    APP_ROOT_PATH: str = "/mdo-tpc-ai"
+    APP_ROOT_PATH: str = ""
 
-    REQUIRED_ROLE: str = "PUBLIC" # set "cbp_creator" for production
+    REQUIRED_ROLES: list[str] = ["MDO_ADMIN", "MDO_LEADER"]
 
     KB_BASE_URL: str = "https://portal.dev.karmayogibharat.net"
     KB_AUTH_TOKEN: str = ""
+    
+    SUNBIRD_SSO_REALM: str = "sunbird"
+    SUNBIRD_SSO_URL: str = ""
 
     DATABASE_URL: str
+    
+    DEFAULT_RELEVANCY_SCORE: int = 90
+
+    NOTIFICATION_BASE_URL: str = ""
+    ENABLE_EMAIL_NOTIFICATION: bool = False
 
 # Create a settings instance that can be imported by other modules
 settings = Settings()

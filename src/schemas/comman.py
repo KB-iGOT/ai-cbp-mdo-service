@@ -13,3 +13,4 @@ class ApprovalItemStatus(str, enum.Enum):
     PENDING = "PENDING"
     APPROVED = "APPROVED"
     REJECTED = "REJECTED"
+    FAILED = "FAILED"

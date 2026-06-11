@@ -78,7 +78,7 @@ async def call_igot_create(
         "accept": "application/json",
         "org": org,
         "rootorg": rootorg,
-        "Authorization": f"bearer {settings.KB_AUTH_TOKEN}",
+        "Authorization": f"{settings.KB_AUTH_TOKEN}",
         "x-authenticated-user-token": token,
         "x-authenticated-user-orgid": org_id,
     }
@@ -133,7 +133,7 @@ async def call_igot_publish(
         "accept": "application/json",
         "org": org,
         "rootorg": rootorg,
-        "Authorization": f"bearer {settings.KB_AUTH_TOKEN}",
+        "Authorization": f"{settings.KB_AUTH_TOKEN}",
         "x-authenticated-user-token": token,
         "x-authenticated-user-orgid": org_id,
         "x-authenticated-user-roles": ""
@@ -155,3 +155,56 @@ async def call_igot_publish(
 
     data = resp.json()
     return data
+
+
+async def call_igot_create_designation(
+    token: str,
+    designation: str,
+    description: str = "",
+) -> dict:
+    """
+    POST to iGOT designation master Create API.
+    Creates the designation in the iGOT master list.
+    Raises HTTPException(502) on failure.
+    """
+    url = f"{settings.KB_BASE_URL}/api/designation/create"
+
+    payload = {
+        "designation": designation,
+        "description": description,
+    }
+
+    headers = {
+        # "accept": "*/*",
+        "Content-Type": "application/json",
+        "Authorization": f"{settings.KB_AUTH_TOKEN}",
+     }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            resp = await client.post(url, json=payload, headers=headers, timeout=30.0)
+            resp.raise_for_status()
+        except httpx.HTTPStatusError as e:
+            # Handle "Already Present" as a non-error (designation exists in master list)
+            try:
+                error_body = e.response.json()
+                errmsg = error_body.get("params", {}).get("errmsg", "")
+                if errmsg == "Already Present":
+                    return {"already_present": True, "message": "Designation is already present in the master list."}
+            except Exception:
+                pass
+            logger.error(
+                f"iGOT designation create API HTTP error: {e.response.status_code} | body={e.response.text}"
+            )
+            raise HTTPException(
+                status_code=502,
+                detail=f"iGOT designation create API returned an error ({e.response.status_code}).",
+            )
+        except httpx.RequestError as e:
+            logger.error(f"iGOT designation create API unreachable: {str(e)}")
+            raise HTTPException(
+                status_code=502,
+                detail="iGOT designation create API is unreachable.",
+            )
+
+    return resp.json()
