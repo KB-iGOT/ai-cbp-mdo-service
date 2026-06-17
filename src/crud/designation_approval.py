@@ -2,7 +2,7 @@
 CRUD operations for Designation Approval (SPV Admin flow).
 """
 import uuid
-from datetime import datetime, date, timezone
+from datetime import datetime, date, timezone, time as dtime
 from typing import List, Optional, Tuple
 
 from sqlalchemy import and_, desc, func, or_, update, text
@@ -28,8 +28,8 @@ class CRUDDesignationApproval:
         page_size: int = 10,
         search: Optional[str] = None,
         status_filter: Optional[str] = None,
-        from_date: Optional[str] = None,
-        to_date: Optional[str] = None,
+        from_date: Optional[date] = None,
+        to_date: Optional[date] = None,
         org_id: Optional[str] = None,
     ) -> Tuple[List[DesignationApproval], int]:
         """
@@ -68,9 +68,9 @@ class CRUDDesignationApproval:
             conditions.append(DesignationApproval.status == normalized)
 
         if from_date:
-            conditions.append(DesignationApproval.created_at >= from_date)
+            conditions.append(DesignationApproval.created_at >= datetime.combine(from_date, dtime.min))
         if to_date:
-            conditions.append(DesignationApproval.created_at <= to_date)
+            conditions.append(DesignationApproval.created_at <= datetime.combine(to_date, dtime.max))
 
         where_clause = and_(*conditions) if conditions else True
 

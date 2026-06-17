@@ -2,7 +2,7 @@
 CRUD operations for MDO Portal approval request management
 """
 import uuid
-from datetime import datetime, date, timezone
+from datetime import datetime, time as dtime, date, timezone
 from typing import Any, List, Optional, Tuple, Dict
 import httpx
 
@@ -30,8 +30,8 @@ class CRUDMDOApprovalRequest:
         page_size: int = 10,
         search: Optional[str] = None,
         status_filter: Optional[str] = None,
-        from_date: Optional[datetime] = None,
-        to_date: Optional[datetime] = None
+        from_date: Optional[date] = None,
+        to_date: Optional[date] = None
     ) -> Tuple[List[ApprovalRequestRead], int]:
         """
         List approval requests assigned to a specific MDO with pagination and filters.
@@ -79,9 +79,9 @@ class CRUDMDOApprovalRequest:
 
         # Date range filter on created_at
         if from_date:
-            conditions.append(ApprovalRequestRead.created_at >= from_date)
+            conditions.append(ApprovalRequestRead.created_at >= datetime.combine(from_date, dtime.min))
         if to_date:
-            conditions.append(ApprovalRequestRead.created_at <= to_date)
+            conditions.append(ApprovalRequestRead.created_at <= datetime.combine(to_date, dtime.max))
 
         where_clause = and_(*conditions)
 

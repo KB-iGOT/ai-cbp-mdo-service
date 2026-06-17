@@ -3,7 +3,7 @@ Controller for Designation Approval workflows (SPV Admin).
 Orchestrates CRUD operations and business logic.
 """
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, date
 from typing import List, Optional, Tuple
 from zoneinfo import ZoneInfo
 
@@ -31,8 +31,8 @@ class DesignationApprovalController:
         page_size: int = 10,
         search: Optional[str] = None,
         status_filter: Optional[str] = None,
-        from_date: Optional[str] = None,
-        to_date: Optional[str] = None,
+        from_date: Optional[date] = None,
+        to_date: Optional[date] = None,
         org_id: Optional[str] = None,
     ) -> Tuple[List[DesignationApproval], int]:
         """

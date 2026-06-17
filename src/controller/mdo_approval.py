@@ -35,8 +35,8 @@ class MDOApprovalController:
         page_size: int = 10,
         search: Optional[str] = None,
         status_filter: Optional[str] = None,
-        from_date: Optional[str] = None,
-        to_date: Optional[str] = None,
+        from_date: Optional[date] = None,
+        to_date: Optional[date] = None,
     ) -> Tuple[List[ApprovalRequestRead], int]:
         """List approval requests with pagination and filters."""
         normalized_status = status_filter.upper() if status_filter else None

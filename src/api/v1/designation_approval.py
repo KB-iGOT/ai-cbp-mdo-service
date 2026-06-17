@@ -6,6 +6,7 @@ submitted from the CBP portal.
 from typing import Optional
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from datetime import date
 
 from ...core.auth import require_role
 from ...core.database import get_db_session
@@ -29,8 +30,8 @@ async def list_designation_approvals(
     page_size: int = Query(10, ge=1, le=100, description="Number of items per page"),
     search: Optional[str] = Query(None, description="Search by designation name, organisation, or email"),
     status_filter: Optional[str] = Query(None, description="Filter by status: pending, approved, rejected"),
-    from_date: Optional[str] = Query(None, description="Filter from date (YYYY-MM-DD)"),
-    to_date: Optional[str] = Query(None, description="Filter to date (YYYY-MM-DD)"),
+    from_date: Optional[date] = Query(None, description="Filter from date (YYYY-MM-DD)"),
+    to_date: Optional[date] = Query(None, description="Filter to date (YYYY-MM-DD)"),
     org_id: Optional[str] = Query(None, description="Filter by organisation ID (state_center_id or department_id)"),
     db: AsyncSession = Depends(get_db_session),
     auth: tuple = Depends(require_role(['SPV_ADMIN','MDO_ADMIN','MDO_LEADER'])),
