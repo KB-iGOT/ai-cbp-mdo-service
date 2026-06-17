@@ -6,6 +6,7 @@ from typing import Optional
 from uuid import UUID
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from datetime import date
 
 from ...core.auth import require_role
 from ...core.database import get_db_session
@@ -40,8 +41,8 @@ async def get_approval_requests(
     page_size: int = Query(10, ge=1, le=100, description="Number of items per page"),
     search: Optional[str] = Query(None, description="Search across request name, request ID, state center, department, and requestor email"),
     status_filter: Optional[str] = Query(None, description="Filter by status (pending, approved, rejected)"),
-    from_date: Optional[str] = Query(None, description="Filter from date (YYYY-MM-DD)"),
-    to_date: Optional[str] = Query(None, description="Filter to date (YYYY-MM-DD)"),
+    from_date: Optional[date] = Query(None, description="Filter from date (YYYY-MM-DD)"),
+    to_date: Optional[date] = Query(None, description="Filter to date (YYYY-MM-DD)"),
     db: AsyncSession = Depends(get_db_session),
     auth: tuple = Depends(require_role(['MDO_ADMIN','MDO_LEADER'])),
 ):
