@@ -30,6 +30,7 @@ class DesignationApprovalItem(BaseModel):
     id: UUID
     designation_name: str
     organisation: Optional[str] = None
+    organization_id: Optional[str] = None
     division: Optional[str] = None       # mapped from wing_division_section
     email: Optional[str] = None          # from user.email
     status: str
@@ -43,6 +44,7 @@ class DesignationApprovalItem(BaseModel):
             "id": obj.id,
             "designation_name": obj.designation_name,
             "organisation": getattr(obj, 'organisation', None),
+            "organization_id": getattr(obj, 'organization_id', None),
             "division": obj.wing_division_section,
             "email": obj.user.email if obj.user else None,
             "status": obj.status,
