@@ -99,18 +99,25 @@ class CRUDDesignationApproval:
         rows = list(result.scalars().all())
 
         # Bulk-fetch organisation names from role_mappings in one query
-        rolemapping_ids = [r.rolemapping_id for r in rows if r.rolemapping_id]
+        rolemapping_ids = list({r.rolemapping_id for r in rows if r.rolemapping_id}) 
         org_map: dict = {}
         if rolemapping_ids:
             org_result = await db.execute(
-                text("SELECT id, state_center_name FROM role_mappings WHERE id = ANY(:ids)")
+                text("SELECT id, state_center_name, department_name, department_id, state_center_id FROM role_mappings WHERE id = ANY(:ids)")
                 .bindparams(ids=rolemapping_ids)
             )
-            org_map = {str(row.id): row.state_center_name for row in org_result}
+            for rm_row in org_result:
+                key = str(rm_row.id)
+                org_map[key] = {
+                    "name": rm_row.department_name if rm_row.department_name else rm_row.state_center_name,
+                    "organization_id": str(rm_row.department_id) if rm_row.department_id else (str(rm_row.state_center_id) if rm_row.state_center_id else None),
+                }
 
         # Attach organisation as a transient attribute
         for row in rows:
-            row.organisation = org_map.get(str(row.rolemapping_id))
+            org_data = org_map.get(str(row.rolemapping_id), {})
+            row.organisation = org_data.get("name")
+            row.organization_id = org_data.get("organization_id")
 
         return rows, total
 
