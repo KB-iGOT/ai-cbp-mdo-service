@@ -45,6 +45,9 @@ class ApprovalRequestRead(Base):
     # MDO who should approve
     mdo_id = Column(String(255), nullable=False, index=True)
 
+    # User who published the request (optional)
+    published_by = Column(String(255), nullable=True, index=True)
+
     # Counts
     designation_count = Column(Integer, nullable=False, default=0)
 

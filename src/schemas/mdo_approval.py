@@ -133,6 +133,7 @@ class ApprovalRequestListItem(BaseModel):
     state_center_name: str
     department_name: Optional[str] = None
     reviewer_comments: Optional[str] = None
+    published_by: Optional[str] = None
 
 
 class ApprovalRequestDetail(BaseModel):
@@ -153,6 +154,7 @@ class ApprovalRequestDetail(BaseModel):
     user: Optional[UserInfo] = None
     rejected_at: Optional[datetime] = None
     reviewer_comments: Optional[str] = None
+    published_by: Optional[str] = None
     items: List[ApprovalRequestItemSchema] = []
 
 

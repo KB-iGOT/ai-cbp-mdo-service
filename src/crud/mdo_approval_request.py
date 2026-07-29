@@ -210,6 +210,7 @@ class CRUDMDOApprovalRequest:
             .values(
                 status=ApprovalStatus.APPROVED,
                 updated_at=now,
+                published_by=mdo_id,
             )
         )
 
