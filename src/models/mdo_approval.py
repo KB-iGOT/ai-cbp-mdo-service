@@ -43,7 +43,7 @@ class ApprovalRequestRead(Base):
     department_name = Column(String(255), nullable=True)
 
     # MDO who should approve
-    mdo_id = Column(String(255), nullable=False, index=True)
+    mdo_id = Column(String(255), nullable=True, index=True)
 
     # User who published the request (optional)
     published_by = Column(String(255), nullable=True, index=True)
