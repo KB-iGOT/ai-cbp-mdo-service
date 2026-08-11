@@ -103,7 +103,7 @@ class ApprovalRequestItemRead(Base):
 
     # Designation details
     designation_name = Column(String(255), nullable=False, index=True)
-    wing_division_section = Column(String(255), nullable=True)
+    wing_division_section = Column(Text, nullable=True)
 
     # JSONB fields
     role_responsibilities = Column(JSONB, default=list, nullable=True)
