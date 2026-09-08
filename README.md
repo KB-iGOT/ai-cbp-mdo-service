@@ -227,5 +227,3 @@ docker stop mdo-approval-system       # Stop container
 docker rm mdo-approval-system         # Remove container
 docker restart mdo-approval-system    # Restart container
 ```
-
-
