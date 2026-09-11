@@ -34,13 +34,14 @@ async def call_igot_create(
     is_apar: bool = False,
     org: str = "dopt",
     rootorg: str = "igot",
-    plan_type: str = "AI CBP-Non APAR"
+    plan_type: str = "AI CBP-Non APAR",
+    plan_year: str = "2026-27"
 ) -> str:
     """
     POST to iGOT CBP plan create API. Returns the created plan ID.
     Raises HTTPException(502) on failure.
     """
-    url = f"{settings.KB_BASE_URL}/api/cbplan/v2/create"
+    url = f"{settings.KB_BASE_URL}/api/cbplan/v3/create"
 
     payload = {
         "request": {
@@ -72,6 +73,7 @@ async def call_igot_create(
             "isApar": is_apar,
             "planType": plan_type,
             "name": plan_name,
+            "planYear": plan_year
         }
     }
 
@@ -121,7 +123,7 @@ async def call_igot_publish(
     POST to iGOT CBP plan publish API. Returns the API response body.
     Raises HTTPException(502) on failure.
     """
-    url = f"{settings.KB_BASE_URL}/api/cbplan/v2/publish"
+    url = f"{settings.KB_BASE_URL}/api/cbplan/v3/publish"
 
     payload = {
         "request": {
