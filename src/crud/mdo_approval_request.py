@@ -182,6 +182,7 @@ class CRUDMDOApprovalRequest:
         mdo_id: str,
         plan_name: str,
         due_date: date,
+        plan_year: str,
         item_results: list,
     ) -> bool:
         """
@@ -225,6 +226,7 @@ class CRUDMDOApprovalRequest:
                         approval_request_item_id=item.id,
                         plan_name=plan_name,
                         due_date=due_dt,
+                        plan_year=plan_year,
                         igot_cbp_plan_id=igot_cbp_plan_id,
                         created_at=now,
                     )
@@ -242,6 +244,7 @@ class CRUDMDOApprovalRequest:
                         approval_request_item_id=item.id,
                         plan_name=plan_name,
                         due_date=due_dt,
+                        plan_year=plan_year,
                         igot_cbp_plan_id=None,
                         created_at=None,
                     )
@@ -661,7 +664,7 @@ class CRUDMDOApprovalRequest:
         Fetch the MdoApproval record and the FAILED item for retry publishing.
         Returns (mdo_approval, item) or (None, None) if not found.
         """
-        # Get the MdoApproval record (plan_name, due_date)
+        # Get the MdoApproval record (plan_name, due_date, plan_year)
         mdo_stmt = (
             select(MdoApproval)
             .where(

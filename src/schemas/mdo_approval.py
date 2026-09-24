@@ -7,6 +7,16 @@ from uuid import UUID
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 
 
+PLAN_YEAR_PATTERN = r"^\d{4}-\d{2}$"
+
+
+def _validate_plan_year(v: str) -> str:
+    start, end = v.split("-")
+    if int(end) != (int(start) + 1) % 100:
+        raise ValueError("plan_year must span consecutive years, e.g. '2026-27'")
+    return v
+
+
 def _validate_rejection_comment(v: str) -> str:
     if not v or not v.strip():
         raise ValueError('Rejection comment cannot be empty')
@@ -19,6 +29,17 @@ class ApproveRequestBody(BaseModel):
     request_id: UUID = Field(..., description="ID of the approval request")
     plan_name: str = Field(..., description="Name of the CBP plan")
     due_date: datetime = Field(..., description="Due date for plan completion")
+    plan_year: str = Field(
+        ...,
+        pattern=PLAN_YEAR_PATTERN,
+        description="Financial year of the CBP plan in YYYY-YY format",
+        examples=["2026-27"],
+    )
+
+    @field_validator('plan_year')
+    @classmethod
+    def validate_plan_year(cls, v: str) -> str:
+        return _validate_plan_year(v)
 
 
 class RetryPublishItemBody(BaseModel):

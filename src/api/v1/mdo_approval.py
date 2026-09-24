@@ -125,13 +125,14 @@ async def publish_request(
     """
     mdo_id, token, approver_name, *_ = auth
     try:
-        logger.info(f"Publishing approval request {body.request_id} by MDO {mdo_id} with plan name '{body.plan_name}'")
+        logger.info(f"Publishing approval request {body.request_id} by MDO {mdo_id} with plan name '{body.plan_name}' and plan year '{body.plan_year}'")
         item_results = await mdo_approval_controller.publish(
             db=db,
             request_id=body.request_id,
             mdo_id=mdo_id,
             plan_name=body.plan_name,
             due_date=body.due_date.date(),
+            plan_year=body.plan_year,
             token=token,
             approver_name=approver_name,
             approver_id=mdo_id,

@@ -108,10 +108,10 @@ Dockerfile                        # Container configuration
 | **CBP → MDO Flow** | CBP plans from the CBP portal arrive as `PENDING` requests for MDO review |
 | **Designation Approval (SPV Admin)** | SPV Admins review, approve, or reject new designation requests with comments |
 | **Designation Review** | Detailed view of designations with role responsibilities, activities, and competencies |
-| **Two-Step iGOT Integration** | On approval, calls the iGOT CBP **Create** API then the **Publish** API; stores the returned `igot_cbp_plan_id` |
+| **Two-Step iGOT Integration** | On approval, calls the iGOT CBP v3 **Create** API then the **Publish** API; stores the returned `igot_cbp_plan_id`. The request's mandatory `plan_year` (`YYYY-YY`, e.g. `2026-27`) is sent unchanged as the create payload's `planYear` |
 | **iGOT Proxy APIs** | Course suggestion search and designation search proxied to iGOT platform |
 | **Bulk Approval / Rejection** | Approve or reject all designations in a request in a single call |
-| **Retry Publish** | Retry publishing a single failed item from an already-approved request |
+| **Retry Publish** | Retry publishing a single failed item from an already-approved request (re-uses the `plan_year` stored on the `mdo_approval` record at publish time) |
 | **Item-Level Rejection** | Reject individual designations with specific reviewer comments |
 | **Email Notifications** | Automated email alerts on approval/rejection for both CBP plans and designation requests |
 | **Role-Based Access Control** | JWT-based auth with role enforcement (`MDO_ADMIN`, `MDO_LEADER`, `SPV_ADMIN`) via Sunbird SSO |

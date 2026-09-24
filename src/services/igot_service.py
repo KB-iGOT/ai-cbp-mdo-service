@@ -31,11 +31,11 @@ async def call_igot_create(
     due_date: date,
     designations: List[str],
     content_ids: List[str],
+    plan_year: str,
     is_apar: bool = False,
     org: str = "dopt",
     rootorg: str = "igot",
     plan_type: str = "AI CBP-Non APAR",
-    plan_year: str = "2026-27"
 ) -> str:
     """
     POST to iGOT CBP plan create API. Returns the created plan ID.
