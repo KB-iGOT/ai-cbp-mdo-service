@@ -21,7 +21,7 @@ def extract_content_list(cbp_plan_data_list: list) -> List[dict]:
             if identifier and identifier not in seen:
                 seen.add(identifier)
                 content_list.append(
-                    {"identifier": identifier, "mandatory": bool(course.get("mandatory", True))}
+                    {"identifier": identifier, "mandatory": bool(course.get("mandatory", False))}
                 )
     return content_list
 

@@ -105,7 +105,7 @@ class MDOApprovalController:
             user_group_id = await call_igot_create_user_group(
                 token=token,
                 org_id=org_id,
-                group_name=f"{plan_name} - {designation}",
+                group_name=f"{plan_name} - {item.approval_request_id}",
                 designations=[designation],
             )
 
