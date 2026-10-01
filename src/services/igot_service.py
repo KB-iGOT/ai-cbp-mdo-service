@@ -1,5 +1,5 @@
 """
-Helper for calling the iGOT CBP plan create & publish APIs.
+Helper for calling the iGOT user group create and CBP plan create & publish APIs.
 """
 from datetime import date
 from typing import List
@@ -11,17 +11,83 @@ from ..core.configs import settings
 from ..core.logger import logger
 
 
-def extract_content_ids(cbp_plan_data_list: list) -> List[str]:
+def extract_content_list(cbp_plan_data_list: list) -> List[dict]:
     seen: set = set()
-    content_ids: List[str] = []
+    content_list: List[dict] = []
     records = cbp_plan_data_list if isinstance(cbp_plan_data_list, list) else [cbp_plan_data_list]
     for record in records:
         for course in record.get("selected_courses", []):
             identifier = course.get("identifier")
             if identifier and identifier not in seen:
                 seen.add(identifier)
-                content_ids.append(identifier)
-    return content_ids
+                content_list.append(
+                    {"identifier": identifier, "mandatory": bool(course.get("mandatory", True))}
+                )
+    return content_list
+
+
+async def call_igot_create_user_group(
+    token: str,
+    org_id: str,
+    group_name: str,
+    designations: List[str],
+    org: str = "dopt",
+    rootorg: str = "igot",
+) -> str:
+    """
+    POST to iGOT user group create API. Returns the created user group ID.
+    Raises HTTPException(502) on failure.
+    """
+    url = f"{settings.KB_BASE_URL}/api/usergroup/v1/create"
+
+    payload = {
+        "request": {
+            "usergroupname": group_name,
+            "criteria": [
+                {
+                    "criteriaKey": "designation",
+                    "criteriaValue": designations,
+                },
+                {
+                    "criteriaKey": "rootOrgId",
+                    "criteriaValue": [org_id],
+                },
+            ],
+        }
+    }
+
+    headers = {
+        "Content-Type": "application/json",
+        "accept": "application/json",
+        "org": org,
+        "rootorg": rootorg,
+        "Authorization": f"{settings.KB_AUTH_TOKEN}",
+        "x-authenticated-user-token": token,
+        "x-authenticated-user-orgid": org_id,
+    }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            resp = await client.post(url, json=payload, headers=headers, timeout=30.0)
+            resp.raise_for_status()
+        except httpx.HTTPStatusError as e:
+            logger.error(f"iGOT user group create API HTTP error: {e.response.status_code} | body={e.response.text}")
+            raise HTTPException(
+                status_code=502,
+                detail=f"iGOT user group create API returned an error ({e.response.status_code}). Approval was not saved.",
+            )
+        except httpx.RequestError as e:
+            logger.error(f"iGOT user group create API unreachable: {str(e)}")
+            raise HTTPException(status_code=502, detail="iGOT user group create API is unreachable. Approval was not saved.")
+
+    data = resp.json()
+    user_group_id = data.get("result", {}).get("usergroupid")
+
+    if not user_group_id:
+        logger.error(f"iGOT user group create API response missing result.usergroupid: {data}")
+        raise HTTPException(status_code=502, detail="iGOT user group create API did not return a user group ID. Approval was not saved.")
+
+    return user_group_id
 
 
 async def call_igot_create(
@@ -29,8 +95,8 @@ async def call_igot_create(
     org_id: str,
     plan_name: str,
     due_date: date,
-    designations: List[str],
-    content_ids: List[str],
+    user_group_id: str,
+    content_list: List[dict],
     plan_year: str,
     is_apar: bool = False,
     org: str = "dopt",
@@ -41,33 +107,19 @@ async def call_igot_create(
     POST to iGOT CBP plan create API. Returns the created plan ID.
     Raises HTTPException(502) on failure.
     """
-    url = f"{settings.KB_BASE_URL}/api/cbplan/v3/create"
+    url = f"{settings.KB_BASE_URL}/api/cbplan/v4/create"
 
     payload = {
         "request": {
             "orgIdList": [org_id],
             "comment": f"{plan_name} published via MDO portal",
-            "contentList": content_ids,
+            "contentList": content_list,
             "contentType": "Course",
             "contextData": {
-            "accessControl": {
-                "userGroups": [
-                    {
-                        "userGroupName": "User Group 1",
-                        "userGroupCriteriaList": [
-                            {
-                                "criteriaKey": "designation",
-                                "criteriaValue": designations,
-                            },
-                            {
-                                "criteriaKey": "rootOrgId",
-                                "criteriaValue": [org_id]
-                            }
-                        ],
-                    }
-                ],
-                "version": 1,
-            }
+                "accessControl": {
+                    "userGroups": [{"userGroupId": user_group_id}],
+                    "version": 1,
+                }
             },
             "endDate": due_date.strftime("%Y-%m-%d"),
             "isApar": is_apar,
@@ -123,7 +175,7 @@ async def call_igot_publish(
     POST to iGOT CBP plan publish API. Returns the API response body.
     Raises HTTPException(502) on failure.
     """
-    url = f"{settings.KB_BASE_URL}/api/cbplan/v3/publish"
+    url = f"{settings.KB_BASE_URL}/api/cbplan/v4/publish"
 
     payload = {
         "request": {
