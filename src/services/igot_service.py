@@ -49,7 +49,7 @@ async def call_igot_search_user_group(
         "request": {
             "filters": {
                 "usergroupname": group_name,
-                "orgId": org_id,
+                "orgid": org_id,
             },
             "limit": 10,
             "offset": 0,
