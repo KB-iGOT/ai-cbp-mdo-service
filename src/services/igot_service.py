@@ -82,8 +82,8 @@ async def call_igot_search_user_group(
             logger.error(f"iGOT user group search API unreachable: {str(e)}")
             raise HTTPException(status_code=502, detail="iGOT user group search API is unreachable. Approval was not saved.")
 
-    for group in resp.json().get("content") or []:
-        if group.get("status", "ACTIVE") != "ACTIVE":
+    for group in (resp.json().get("result") or {}).get("content") or []:
+        if str(group.get("status", "active")).lower() != "active":
             continue
         if group.get("usergroupname") == group_name and group.get("usergroupid"):
             return group["usergroupid"]
