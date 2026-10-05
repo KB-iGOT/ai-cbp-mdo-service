@@ -17,9 +17,9 @@ from ..models.mdo_approval import ApprovalRequestRead, ApprovalRequestItemRead
 from ..schemas.comman import ApprovalItemStatus
 from ..services.igot_service import (
     call_igot_create,
-    call_igot_create_user_group,
     call_igot_publish,
     extract_content_list,
+    get_or_create_user_group,
 )
 from ..services.notification_service import notification_service
 
@@ -102,11 +102,10 @@ class MDOApprovalController:
             }
 
         try:
-            user_group_id = await call_igot_create_user_group(
+            user_group_id = await get_or_create_user_group(
                 token=token,
                 org_id=org_id,
-                group_name=f"{plan_name} - {item.approval_request_id}",
-                designations=[designation],
+                designation=designation,
             )
 
             igot_cbp_plan_id_str = await call_igot_create(
