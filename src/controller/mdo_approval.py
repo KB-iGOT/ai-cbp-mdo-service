@@ -15,7 +15,12 @@ from ..core.logger import logger
 from ..crud.mdo_approval_request import crud_mdo_approval_request
 from ..models.mdo_approval import ApprovalRequestRead, ApprovalRequestItemRead
 from ..schemas.comman import ApprovalItemStatus
-from ..services.igot_service import call_igot_create, call_igot_publish, extract_content_ids
+from ..services.igot_service import (
+    call_igot_create,
+    call_igot_publish,
+    extract_content_list,
+    get_or_create_user_group,
+)
 from ..services.notification_service import notification_service
 
 IST = ZoneInfo("Asia/Kolkata")
@@ -79,11 +84,11 @@ class MDOApprovalController:
         Returns a result dict with item_id, designation_name, status, and plan_id.
         """
         designation = item.igot_designation_name or item.designation_name
-        content_ids: List[str] = []
+        content_list: List[dict] = []
         if item.cbp_plan_data:
-            content_ids = extract_content_ids(item.cbp_plan_data)
+            content_list = extract_content_list(item.cbp_plan_data)
 
-        if not content_ids:
+        if not content_list:
             logger.warning(
                 f"No content IDs found for item {item.id} ({designation}). "
                 "cbp_plan_data may be empty or missing selected_courses."
@@ -97,13 +102,19 @@ class MDOApprovalController:
             }
 
         try:
+            user_group_id = await get_or_create_user_group(
+                token=token,
+                org_id=org_id,
+                designation=designation,
+            )
+
             igot_cbp_plan_id_str = await call_igot_create(
                 token=token,
                 org_id=org_id,
                 plan_name=plan_name,
                 due_date=due_date,
-                designations=[designation],
-                content_ids=content_ids,
+                user_group_id=user_group_id,
+                content_list=content_list,
                 plan_year=plan_year,
                 is_apar=False,
             )
